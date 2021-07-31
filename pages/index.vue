@@ -53,6 +53,7 @@ export default {
         player1: null,
         player2: null,
         deck: {},
+        steps: 0,
       }
       for (let i = 0; i < 3; i++) {
         gamedoc.deck[i] = Array(3).fill(0)

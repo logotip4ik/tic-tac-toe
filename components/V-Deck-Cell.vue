@@ -25,6 +25,7 @@ export default {
   align-items: center;
   border: 1px solid #ccc;
   transition: background-color var(--transition);
+  font-size: 2rem;
 
   &:hover,
   &:focus {

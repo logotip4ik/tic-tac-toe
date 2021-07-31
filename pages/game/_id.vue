@@ -4,9 +4,6 @@
       <canvas ref="qrcode"></canvas>
     </div>
     <VDeck :deck="gamedoc.deck" @toggle-cell="toggleCell"></VDeck>
-    <pre>
-      {{ gamedoc }}
-    </pre>
   </div>
 </template>
 
@@ -44,16 +41,28 @@ export default {
     this.deleteGame()
   },
   methods: {
-    // getCellValue() {
-    //   this.
-    // },
+    getCellValue() {
+      const isEven = this.gamedoc.steps % 2 === 0
+      if (this.gamedoc.player1 === this.user.uid) {
+        if (isEven) return 1
+      } else if (this.gamedoc.player2 === this.user.uid) {
+        if (!isEven) return -1
+      }
+      return 0
+    },
     toggleCell({ x, y }) {
+      const cellValue = this.getCellValue()
+      if (cellValue === 0) return
       const docPath = `games/${this.gamedoc.id}`
       const deck = {
         ...this.gamedoc.deck,
-        [x]: this.gamedoc.deck[x].map((val, idx) => (idx === y ? 1 : val)),
+        [x]: this.gamedoc.deck[x].map((val, idx) =>
+          idx === y ? this.getCellValue() : val
+        ),
       }
-      this.$fire.firestore.doc(docPath).set({ ...this.gamedoc, deck })
+      this.$fire.firestore
+        .doc(docPath)
+        .set({ ...this.gamedoc, deck, steps: this.gamedoc.steps + 1 })
     },
     setupListener(shared) {
       const docPath = `games/${this.$route.params.id}`
@@ -100,5 +109,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  @media (prefers-color-scheme: dark) {
+    background-color: var(--dark-color);
+  }
 }
 </style>
