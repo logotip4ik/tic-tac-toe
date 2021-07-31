@@ -3,8 +3,13 @@
     <h1>🎲Tic Tac Toe🎲</h1>
     <div class="main__buttons">
       <button @click="createGame">Create game</button>
-      <button>Join game</button>
+      <button @click="showingJoin = !showingJoin">Join game</button>
     </div>
+    <VModal v-model="showingJoin">
+      <h2 class="main__modal__heading">Enter the code:</h2>
+      <input v-model="joinCode" class="main__modal__input" />
+      <button class="main__modal__button">Join</button>
+    </VModal>
   </div>
 </template>
 
@@ -13,6 +18,10 @@ import { nanoid } from 'nanoid'
 import { fire } from '~/firebase'
 
 export default {
+  data: () => ({
+    showingJoin: false,
+    joinCode: '',
+  }),
   methods: {
     createGame() {
       const gamedoc = {
@@ -100,6 +109,27 @@ export default {
           background-color: #32539a;
         }
       }
+    }
+  }
+
+  &__modal {
+    &__heading {
+      font-weight: 400;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    &__input {
+      width: 100%;
+      appearance: none;
+      border: none;
+      border-radius: 0;
+      background-color: transparent;
+      border-bottom: 1px solid #ccc;
+      box-shadow: 0 10px 10px -5px rgba($color: #000000, $alpha: 0.1);
+      margin-bottom: 1.5rem;
+      font: inherit;
+      font-size: 1.1rem;
+      padding: 0.25rem 0.1rem;
     }
   }
 }

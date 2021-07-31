@@ -18,6 +18,7 @@
     "nanoid": "^3.1.23",
     "nuxt": "^2.15.7",
     "qrcode": "^1.4.4",
+    "v-click-outside": "^3.1.2",
     "yarn": "^1.22.11"
   },
   "devDependencies": {
