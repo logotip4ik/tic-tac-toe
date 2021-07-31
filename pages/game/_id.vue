@@ -1,30 +1,32 @@
 <template>
   <div>
-    {{ $route.name }}
-    {{ initial }}
-    <canvas ref="qrcode" class="qrcode"></canvas>
-    {{ player1 }}
-    {{ player2 }}
+    <div v-if="!gamedoc.player2" class="qrcode">
+      <canvas ref="qrcode"></canvas>
+    </div>
+    <pre>
+      {{ gamedoc }}
+    </pre>
   </div>
 </template>
 
 <script>
-import fire from 'firebase'
+// import fire from 'firebase'
 import qrcode from 'qrcode'
 
 export default {
-  async asyncData({ query, params, redirect }) {
+  asyncData({ params, redirect, query }) {
     if (!params.id) return redirect('/')
-    const doc = fire.firestore().doc(`games/${params.id}`)
-    const data = (await doc.get()).data()
-    if (!query.initial && data.player1 && !data.player2) return
-    const { user } = await fire.auth().signInAnonymously()
-    doc.set({ player2: user.uid }, { merge: true })
+    if (!query.initial) return { title: 'Connect to play tictactoe' }
   },
   data: () => ({
-    player1: null,
-    player2: null,
+    gamedoc: {},
+    user: {},
   }),
+  head() {
+    return {
+      title: this.title || 'Tic Tac Toe',
+    }
+  },
   computed: {
     initial() {
       return this.$route.query.initial || false
@@ -33,31 +35,35 @@ export default {
   mounted() {
     const { query } = this.$route
     if (query.initial) this.showShare()
-    this.setupListener()
+    this.signin()
+    this.setupListener(!query.initial)
   },
   beforeDestroy() {
     this.deleteGame()
   },
   methods: {
-    setupListener() {
+    setupListener(shared) {
       const docPath = `games/${this.$route.params.id}`
-      fire
-        .firestore()
-        .doc(docPath)
-        .onSnapshot((doc) => {
-          const data = doc.data()
-          Object.keys(data).forEach((key) =>
-            this[key] !== data[key] ? (this[key] = data[key]) : null
-          )
-        })
+
+      this.$fire.auth.signInAnonymously().then(({ user }) => {
+        document.title = 'Tic Tac Toe'
+        this.user = user
+        if (shared)
+          this.$fire.firestore
+            .doc(docPath)
+            .set({ player2: user.uid }, { merge: true })
+        this.$fire.firestore
+          .doc(docPath)
+          .onSnapshot((doc) => (this.gamedoc = doc.data()))
+      })
     },
+    signin() {},
     showShare() {
       const shareHref = `${location.origin}${location.pathname}`
       qrcode.toCanvas(this.$refs.qrcode, shareHref)
     },
     deleteGame() {
-      fire
-        .firestore()
+      this.$fire.firestore
         .collection('games')
         .doc(this.$route.params.id)
         .delete()
@@ -67,4 +73,19 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="scss">
+.qrcode {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  width: 100vw;
+  height: 100vw;
+  background-color: var(--light-color);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>

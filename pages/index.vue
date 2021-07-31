@@ -15,7 +15,7 @@
 
 <script>
 import { nanoid } from 'nanoid'
-import { fire } from '~/firebase'
+// import { fire } from '~/firebase'
 
 export default {
   data: () => ({
@@ -30,13 +30,11 @@ export default {
         player2: null,
         steps: [],
       }
-      fire
-        .auth()
+      this.$fire.auth
         .signInAnonymously()
         .then(({ user }) => {
           gamedoc.player1 = user.uid
-          fire
-            .firestore()
+          this.$fire.firestore
             .collection('games')
             .doc(gamedoc.id)
             .set(gamedoc)
