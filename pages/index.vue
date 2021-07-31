@@ -2,15 +2,45 @@
   <div class="main">
     <h1>🎲Tic Tac Toe🎲</h1>
     <div class="main__buttons">
-      <button>Create game</button>
+      <button @click="createGame">Create game</button>
       <button>Join game</button>
     </div>
   </div>
 </template>
 
 <script>
+import { nanoid } from 'nanoid'
+
 export default {
-  computed: {},
+  methods: {
+    createGame() {
+      const gamedoc = {
+        id: nanoid(9),
+        player1: null,
+        player2: null,
+        steps: [],
+      }
+      console.log(this.$fire.auth(), gamedoc)
+      // this.$fire
+      //   .auth()
+      //   .signInAnonymously()
+      //   .then((user) => {
+      //     gamedoc.player1 = user.uid
+      //     this.$fire
+      //       .firestore()
+      //       .doc(gamedoc.id)
+      //       .set(gamedoc)
+      //       .then(() =>
+      //         this.$router.push({ name: 'game-id', params: gamedoc.id })
+      //       )
+      //   })
+      //   .catch((error) => {
+      //     console.warn(error)
+      //     // var errorCode = error.code;
+      //     // var errorMessage = error.message;
+      //   })
+    },
+  },
 }
 </script>
 

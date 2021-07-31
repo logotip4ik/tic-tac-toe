@@ -1,5 +1,7 @@
 <template>
-  <h1>createGame</h1>
+  <div>
+    {{ $route.name }}
+  </div>
 </template>
 
 <script>
