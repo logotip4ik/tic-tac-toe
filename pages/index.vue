@@ -10,35 +10,34 @@
 
 <script>
 import { nanoid } from 'nanoid'
+import { fire } from '~/firebase'
 
 export default {
   methods: {
     createGame() {
       const gamedoc = {
-        id: nanoid(9),
+        id: nanoid(8),
         player1: null,
         player2: null,
         steps: [],
       }
-      console.log(this.$fire.auth(), gamedoc)
-      // this.$fire
-      //   .auth()
-      //   .signInAnonymously()
-      //   .then((user) => {
-      //     gamedoc.player1 = user.uid
-      //     this.$fire
-      //       .firestore()
-      //       .doc(gamedoc.id)
-      //       .set(gamedoc)
-      //       .then(() =>
-      //         this.$router.push({ name: 'game-id', params: gamedoc.id })
-      //       )
-      //   })
-      //   .catch((error) => {
-      //     console.warn(error)
-      //     // var errorCode = error.code;
-      //     // var errorMessage = error.message;
-      //   })
+      fire
+        .auth()
+        .signInAnonymously()
+        .then(({ user }) => {
+          gamedoc.player1 = user.uid
+          fire
+            .firestore()
+            .collection('games')
+            .doc(gamedoc.id)
+            .set(gamedoc)
+            .then(() =>
+              this.$router.push({ name: 'game-id', params: { id: gamedoc.id } })
+            )
+        })
+        .catch((error) => {
+          console.warn(error)
+        })
     },
   },
 }
