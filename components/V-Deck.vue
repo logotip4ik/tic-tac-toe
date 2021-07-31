@@ -12,14 +12,8 @@
 </template>
 
 <script>
-// import { nanoid } from 'nanoid'
 export default {
   props: { deck: { type: Object, required: true, default: () => ({}) } },
-  methods: {
-    log() {
-      console.log('I was clicked')
-    },
-  },
 }
 </script>
 

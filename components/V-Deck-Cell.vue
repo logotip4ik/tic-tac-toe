@@ -1,7 +1,7 @@
 <template>
-  <div class="cell" @click="$emit('click')">
+  <button class="cell" @click="$emit('click')">
     <span>{{ char }}</span>
-  </div>
+  </button>
 </template>
 
 <script>
@@ -24,13 +24,20 @@ export default {
   justify-content: center;
   align-items: center;
   border: 1px solid #ccc;
+  background-color: transparent;
+  appearance: none;
+  border-radius: 0;
   transition: background-color var(--transition);
-  font-size: 2rem;
+  font-size: 3rem;
 
   &:hover,
   &:focus {
     transition: none;
     background-color: #ccc;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    color: whitesmoke;
   }
 }
 </style>

@@ -1,8 +1,11 @@
 <template>
-  <div>
+  <div class="main">
     <div v-if="!gamedoc.player2" class="qrcode">
       <canvas ref="qrcode"></canvas>
     </div>
+    <h2 class="turn">
+      {{ currTurn === 1 ? 'Your turn' : 'Opponent Turn' }}
+    </h2>
     <VDeck :deck="gamedoc.deck" @toggle-cell="toggleCell"></VDeck>
   </div>
 </template>
@@ -29,6 +32,17 @@ export default {
   computed: {
     initial() {
       return this.$route.query.initial || false
+    },
+    currTurn() {
+      const isEven = this.gamedoc.steps % 2 === 0
+      const isPlayer1 = this.gamedoc.player1 === this.user.uid
+
+      if (isPlayer1 && isEven) return 1
+      if (isPlayer1 && !isEven) return -1
+      if (!isPlayer1 && !isEven) return 1
+      if (!isPlayer1 && isEven) return -1
+
+      return 0
     },
   },
   mounted() {
@@ -113,5 +127,13 @@ export default {
   @media (prefers-color-scheme: dark) {
     background-color: var(--dark-color);
   }
+}
+.main {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 2rem;
 }
 </style>
