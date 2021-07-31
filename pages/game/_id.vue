@@ -3,6 +3,7 @@
     <div v-if="!gamedoc.player2" class="qrcode">
       <canvas ref="qrcode"></canvas>
     </div>
+    <VDeck :deck="gamedoc.deck" @toggle-cell="toggleCell"></VDeck>
     <pre>
       {{ gamedoc }}
     </pre>
@@ -20,6 +21,7 @@ export default {
   },
   data: () => ({
     gamedoc: {},
+    doc: {},
     user: {},
   }),
   head() {
@@ -42,16 +44,27 @@ export default {
     this.deleteGame()
   },
   methods: {
+    // getCellValue() {
+    //   this.
+    // },
+    toggleCell({ x, y }) {
+      const docPath = `games/${this.gamedoc.id}`
+      const deck = {
+        ...this.gamedoc.deck,
+        [x]: this.gamedoc.deck[x].map((val, idx) => (idx === y ? 1 : val)),
+      }
+      this.$fire.firestore.doc(docPath).set({ ...this.gamedoc, deck })
+    },
     setupListener(shared) {
       const docPath = `games/${this.$route.params.id}`
 
       this.$fire.auth.signInAnonymously().then(({ user }) => {
         document.title = 'Tic Tac Toe'
         this.user = user
-        if (shared)
-          this.$fire.firestore
-            .doc(docPath)
-            .set({ player2: user.uid }, { merge: true })
+        if (shared) {
+          this.doc = this.$fire.firestore.doc(docPath)
+          this.doc.set({ player2: user.uid }, { merge: true })
+        }
         this.$fire.firestore
           .doc(docPath)
           .onSnapshot((doc) => (this.gamedoc = doc.data()))

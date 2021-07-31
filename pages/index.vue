@@ -24,12 +24,8 @@ export default {
   }),
   methods: {
     createGame() {
-      const gamedoc = {
-        id: nanoid(8),
-        player1: null,
-        player2: null,
-        steps: [],
-      }
+      const gamedoc = this.createGameDoc()
+
       this.$fire.auth
         .signInAnonymously()
         .then(({ user }) => {
@@ -50,6 +46,18 @@ export default {
           // eslint-disable-next-line
           console.warn(error)
         })
+    },
+    createGameDoc() {
+      const gamedoc = {
+        id: nanoid(8),
+        player1: null,
+        player2: null,
+        deck: {},
+      }
+      for (let i = 0; i < 3; i++) {
+        gamedoc.deck[i] = Array(3).fill(0)
+      }
+      return gamedoc
     },
   },
 }
