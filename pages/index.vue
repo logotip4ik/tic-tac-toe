@@ -32,10 +32,15 @@ export default {
             .doc(gamedoc.id)
             .set(gamedoc)
             .then(() =>
-              this.$router.push({ name: 'game-id', params: { id: gamedoc.id } })
+              this.$router.push({
+                name: 'game-id',
+                params: { id: gamedoc.id },
+                query: { initial: true },
+              })
             )
         })
         .catch((error) => {
+          // eslint-disable-next-line
           console.warn(error)
         })
     },
