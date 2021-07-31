@@ -17,5 +17,10 @@ export default {}
   width: 100%;
   max-width: 700px;
   padding: 1rem;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }
 </style>
