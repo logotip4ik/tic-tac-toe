@@ -1,0 +1,110 @@
+:root {
+  --transition: 0.3s ease;
+  --shadow-dark: 0 2.8px 2.2px rgba(0, 0, 0, 0.02),
+    0 6.7px 5.3px rgba(0, 0, 0, 0.028), 0 12.5px 10px rgba(0, 0, 0, 0.035),
+    0 22.3px 17.9px rgba(0, 0, 0, 0.042), 0 41.8px 33.4px rgba(0, 0, 0, 0.05),
+    0 100px 80px rgba(0, 0, 0, 0.07);
+
+  --light-color: #e5e5e5;
+  --dark-color: #14213d;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+html,
+body {
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+}
+#__nuxt,
+#__layout {
+  min-height: 100vh;
+  background-color: #e5e5e5;
+  color: black;
+  transition: color var(--transition), background-color var(--transition);
+}
+
+@media (prefers-color-scheme: dark) {
+  #__nuxt,
+  #__layout {
+    background-color: #14213d;
+    color: whitesmoke;
+  }
+}
+
+.main {
+  width: 100%;
+  max-width: 700px;
+
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  padding: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 3rem;
+}
+
+.main__buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.main__buttons button,
+.main_buttons a {
+  padding: 0.75rem 1.5rem;
+  font: inherit;
+  font-size: 1rem;
+  text-transform: uppercase;
+  color: currentColor;
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background-color: transparent;
+  box-shadow: var(--shadow-dark);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--transition), border-color var(--transition);
+}
+
+.main__buttons button:disabled,
+.main_buttons a:disabled {
+  cursor: initial;
+  color: #ccc !important;
+  background-color: rgba(100, 100, 100, 0.5) !important;
+}
+
+.main__buttons button:is(:hover, :focus),
+.main__buttons a:is(:hover, :focus) {
+  transition: none;
+  background-color: #fafafa;
+}
+
+@media (prefers-color-scheme: dark) {
+  .main__buttons button,
+  .main__buttons a {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .main__buttons button:is(:focus, :hover),
+  .main__buttons a:is(:focus, :hover) {
+    background-color: #32539a;
+  }
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition: opacity var(--transition);
+}
+.page-enter,
+.page-leave-active {
+  opacity: 0;
+}

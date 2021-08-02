@@ -20,7 +20,7 @@ export default {
     host: '0.0.0.0',
   },
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [],
+  css: ['~/assets/css/default.css'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: ['~/plugins/v-outside-click'],

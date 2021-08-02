@@ -3,7 +3,7 @@
     <h1>🎲Tic Tac Toe🎲</h1>
     <div class="main__buttons">
       <button @click="createGame">Create game</button>
-      <button @click="showingJoin = !showingJoin">Join game</button>
+      <NuxtLink to="/join">Join game</NuxtLink>
     </div>
     <VModal v-model="showingJoin">
       <h2 class="main__modal__heading">Enter the code:</h2>
@@ -88,7 +88,8 @@ export default {
     align-items: center;
     gap: 1rem;
 
-    button {
+    button,
+    a {
       padding: 0.75rem 1.5rem;
       font: inherit;
       font-size: 1rem;
@@ -100,6 +101,7 @@ export default {
       background-color: transparent;
       box-shadow: var(--shadow-dark);
       cursor: pointer;
+      text-decoration: none;
       transition: background-color var(--transition),
         border-color var(--transition);
 
@@ -116,27 +118,6 @@ export default {
           background-color: #32539a;
         }
       }
-    }
-  }
-
-  &__modal {
-    &__heading {
-      font-weight: 400;
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    &__input {
-      width: 100%;
-      appearance: none;
-      border: none;
-      border-radius: 0;
-      background-color: transparent;
-      border-bottom: 1px solid #ccc;
-      box-shadow: 0 10px 10px -5px rgba($color: #000000, $alpha: 0.1);
-      margin-bottom: 1.5rem;
-      font: inherit;
-      font-size: 1.1rem;
-      padding: 0.25rem 0.1rem;
     }
   }
 }
