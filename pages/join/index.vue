@@ -1,7 +1,12 @@
 <template>
   <div class="main">
     <h1>Enter Code</h1>
-    <input v-model="joinCode" class="main__input" />
+    <input
+      ref="input"
+      v-model="joinCode"
+      class="main__input"
+      @keypress.enter.prevent="join"
+    />
     <div class="main__buttons">
       <button :disabled="!showButton" @click="join">Join</button>
     </div>
@@ -17,6 +22,9 @@ export default {
     showButton() {
       return this.joinCode.length === 8
     },
+  },
+  mounted() {
+    setTimeout(() => this.$refs.input.focus(), 300)
   },
   methods: {
     join() {
