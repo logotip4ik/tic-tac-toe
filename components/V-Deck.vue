@@ -19,7 +19,7 @@ export default {
 
 <style>
 .deck {
-  margin: 0 auto;
+  width: 100%;
   text-align: center;
   display: flex;
   justify-content: center;

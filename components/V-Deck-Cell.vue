@@ -20,6 +20,8 @@ export default {
   $size: 25vmin;
   width: $size;
   height: $size;
+  max-width: 100%;
+  aspect-ratio: 1/1;
   display: flex;
   justify-content: center;
   align-items: center;

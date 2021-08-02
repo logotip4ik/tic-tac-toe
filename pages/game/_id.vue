@@ -12,7 +12,7 @@
     <transition name="page">
       <div v-if="gamedoc.winner" class="overlay main__buttons">
         <h1>
-          {{ user.uid === gamedoc.winner ? 'You win!' : 'Opponent wins' }}
+          {{ winString }}
         </h1>
         <button @click="restart">Play again</button>
       </div>
@@ -33,24 +33,15 @@ export default {
     this.deleteGame()
     next()
   },
-  asyncData({ params, redirect, query }) {
+  asyncData({ params, redirect }) {
     if (!params.id) return redirect('/')
-    if (!query.initial) return { title: 'Connect to play tictactoe' }
   },
   data: () => ({
     gamedoc: {},
     doc: {},
     user: {},
   }),
-  head() {
-    return {
-      title: this.title || 'Tic Tac Toe',
-    }
-  },
   computed: {
-    initial() {
-      return this.$route.query.initial || false
-    },
     currTurn() {
       if (!this.gamedoc) return 0
       const isEven = this.gamedoc.steps % 2 === 0
@@ -63,11 +54,26 @@ export default {
 
       return 0
     },
+    winString() {
+      if (typeof this.gamedoc.win === 'string') {
+        if (this.user.uid === this.gamedoc.winner) return 'You win!'
+        return 'Opponent win!'
+      }
+      return 'Tie'
+    },
+  },
+  watch: {
+    gamedoc({ steps }) {
+      const docPath = `games/${this.gamedoc.id}`
+      if (steps === 9)
+        this.$fire.firestore.doc(docPath).set({ winner: 1 }, { merge: true })
+    },
   },
   mounted() {
     const { query } = this.$route
     if (query.initial) this.showShare()
     this.setupListener(!query.initial)
+    document.title = 'Tic Tac Toe'
   },
   beforeDestroy() {
     // this.deleteGame()
@@ -82,6 +88,7 @@ export default {
       }
       this.$fire.firestore.doc(docPath).set(
         {
+          steps: 0,
           winner: null,
           deck: newDeck,
           player1: this.gamedoc.player2,
@@ -215,7 +222,7 @@ export default {
   transform: translate(-50%, -50%);
   z-index: 9999;
   width: 100vw;
-  height: 100vw;
+  height: 100vh;
   background-color: var(--light-color);
 
   display: flex;
