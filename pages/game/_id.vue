@@ -1,15 +1,22 @@
 <template>
   <div class="main">
-    <div v-if="$route.query.initial && !gamedoc.player2" class="qrcode">
-      <canvas ref="qrcode"></canvas>
-      OR
-      <span>
-        Enter this code: <br /><code>{{ $route.params.id }}</code>
-      </span>
-    </div>
-    <div v-if="gamedoc.winner" class="qrcode">
-      <h1>{{ user.uid === gamedoc.winner ? 'You win!' : 'Opponent wins' }}</h1>
-    </div>
+    <transition name="page">
+      <div v-if="$route.query.initial && !gamedoc.player2" class="overlay">
+        <canvas ref="qrcode"></canvas>
+        OR
+        <span>
+          Enter this code: <br /><code>{{ $route.params.id }}</code>
+        </span>
+      </div>
+    </transition>
+    <transition name="page">
+      <div v-if="gamedoc.winner" class="overlay main__buttons">
+        <h1>
+          {{ user.uid === gamedoc.winner ? 'You win!' : 'Opponent wins' }}
+        </h1>
+        <button @click="restart">Play again</button>
+      </div>
+    </transition>
     <h2 class="turn">
       {{ currTurn === 1 ? 'Your turn' : 'Opponent Turn' }}
     </h2>
@@ -22,8 +29,9 @@
 import qrcode from 'qrcode'
 
 export default {
-  async beforeRouteLeave() {
-    await this.deleteGame()
+  beforeRouteLeave(_, __, next) {
+    this.deleteGame()
+    next()
   },
   asyncData({ params, redirect, query }) {
     if (!params.id) return redirect('/')
@@ -65,6 +73,23 @@ export default {
     // this.deleteGame()
   },
   methods: {
+    restart() {
+      const docPath = `games/${this.gamedoc.id}`
+      const newDeck = {}
+      // Firebase does not allow nested arrays
+      for (let i = 0; i < 3; i++) {
+        newDeck[i] = Array(3).fill(0)
+      }
+      this.$fire.firestore.doc(docPath).set(
+        {
+          winner: null,
+          deck: newDeck,
+          player1: this.gamedoc.player2,
+          player2: this.gamedoc.player1,
+        },
+        { merge: true }
+      )
+    },
     getCellValue() {
       const isEven = this.gamedoc.steps % 2 === 0
       if (this.gamedoc.player1 === this.user.uid) {
@@ -96,16 +121,19 @@ export default {
     setupListener(shared) {
       const docPath = `games/${this.$route.params.id}`
 
-      this.$fire.auth.signInAnonymously().then(({ user }) => {
+      this.$fire.auth.signInAnonymously().then(async ({ user }) => {
         document.title = 'Tic Tac Toe'
         this.user = user
         if (shared) {
-          this.doc = this.$fire.firestore.doc(docPath)
-          this.doc.set({ player2: user.uid }, { merge: true })
+          const doc = this.$fire.firestore.doc(docPath)
+          const { exists } = await doc.get()
+          if (!exists) return this.$router.push('/')
+          doc.set({ player2: user.uid }, { merge: true })
         }
-        this.$fire.firestore
-          .doc(docPath)
-          .onSnapshot((doc) => (this.gamedoc = doc.data()))
+        this.$fire.firestore.doc(docPath).onSnapshot((doc) => {
+          if (!doc.exists) return this.$router.push('/')
+          this.gamedoc = doc.data()
+        })
       })
 
       window.onbeforeunload = async () => {
@@ -119,8 +147,8 @@ export default {
         for (let j = 0; j < 3; j++) {
           rowSum += this.gamedoc.deck[i][j]
         }
-        if (rowSum === 3) return this.gamedoc.player2
-        else if (rowSum === -3) return this.gamedoc.player1
+        if (rowSum === 3) return this.gamedoc.player1
+        else if (rowSum === -3) return this.gamedoc.player2
       }
 
       for (let i = 0; i < 3; i++) {
@@ -128,8 +156,8 @@ export default {
         for (let j = 0; j < 3; j++) {
           colSum += this.gamedoc.deck[j][i]
         }
-        if (colSum === 3) return this.gamedoc.player2
-        else if (colSum === -3) return this.gamedoc.player1
+        if (colSum === 3) return this.gamedoc.player1
+        else if (colSum === -3) return this.gamedoc.player2
       }
 
       if (
@@ -138,14 +166,14 @@ export default {
           this.gamedoc.deck[2][2] ===
         3
       )
-        return this.gamedoc.player2
+        return this.gamedoc.player1
       else if (
         this.gamedoc.deck[0][0] +
           this.gamedoc.deck[1][1] +
           this.gamedoc.deck[2][2] ===
         -3
       )
-        return this.gamedoc.player1
+        return this.gamedoc.player2
 
       if (
         this.gamedoc.deck[2][0] +
@@ -153,14 +181,14 @@ export default {
           this.gamedoc.deck[0][2] ===
         3
       )
-        return this.gamedoc.player2
+        return this.gamedoc.player1
       else if (
         this.gamedoc.deck[2][0] +
           this.gamedoc.deck[1][1] +
           this.gamedoc.deck[0][2] ===
         -3
       )
-        return this.gamedoc.player1
+        return this.gamedoc.player2
 
       return null
     },
@@ -180,7 +208,7 @@ export default {
 </script>
 
 <style lang="scss">
-.qrcode {
+.overlay {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -210,8 +238,10 @@ export default {
     font-size: 1.1rem;
     font-weight: 600;
     letter-spacing: 0.5px;
+    user-select: all;
   }
 }
+
 .main {
   min-height: 100vh;
   display: flex;
