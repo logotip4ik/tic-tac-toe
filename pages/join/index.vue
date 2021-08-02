@@ -3,7 +3,7 @@
     <h1>Enter Code</h1>
     <input v-model="joinCode" class="main__input" />
     <div class="main__buttons">
-      <button :disabled="!showButton">Join</button>
+      <button :disabled="!showButton" @click="join">Join</button>
     </div>
   </div>
 </template>
@@ -15,7 +15,15 @@ export default {
   }),
   computed: {
     showButton() {
-      return this.joinCode.length >= 8
+      return this.joinCode.length === 8
+    },
+  },
+  methods: {
+    join() {
+      if (this.joinCode.length !== 8) return
+      try {
+        this.$router.push({ name: 'game-id', params: { id: this.joinCode } })
+      } catch (error) {}
     },
   },
 }

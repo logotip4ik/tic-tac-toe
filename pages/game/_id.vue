@@ -1,7 +1,11 @@
 <template>
   <div class="main">
-    <div v-if="!gamedoc.player2" class="qrcode">
+    <div v-if="!gamedoc || !gamedoc.player2" class="qrcode">
       <canvas ref="qrcode"></canvas>
+      OR
+      <span
+        >Enter this code: <br /><code>{{ $route.params.id }}</code></span
+      >
     </div>
     <h2 class="turn">
       {{ currTurn === 1 ? 'Your turn' : 'Opponent Turn' }}
@@ -15,6 +19,9 @@
 import qrcode from 'qrcode'
 
 export default {
+  async beforeRouteLeave() {
+    await this.deleteGame()
+  },
   asyncData({ params, redirect, query }) {
     if (!params.id) return redirect('/')
     if (!query.initial) return { title: 'Connect to play tictactoe' }
@@ -34,6 +41,7 @@ export default {
       return this.$route.query.initial || false
     },
     currTurn() {
+      if (!this.gamedoc) return 0
       const isEven = this.gamedoc.steps % 2 === 0
       const isPlayer1 = this.gamedoc.player1 === this.user.uid
 
@@ -92,14 +100,19 @@ export default {
           .doc(docPath)
           .onSnapshot((doc) => (this.gamedoc = doc.data()))
       })
+
+      window.onbeforeunload = async () => {
+        await this.deleteGame()
+        return 'Are you sure you want to leave ?'
+      }
     },
     signin() {},
     showShare() {
       const shareHref = `${location.origin}${location.pathname}`
       qrcode.toCanvas(this.$refs.qrcode, shareHref)
     },
-    deleteGame() {
-      this.$fire.firestore
+    async deleteGame() {
+      await this.$fire.firestore
         .collection('games')
         .doc(this.$route.params.id)
         .delete()
@@ -123,9 +136,23 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+
+  gap: 1rem;
 
   @media (prefers-color-scheme: dark) {
     background-color: var(--dark-color);
+  }
+
+  code {
+    line-height: 2;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    background-color: rgba($color: #000000, $alpha: 0.5);
+    color: #ddd;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
   }
 }
 .main {
