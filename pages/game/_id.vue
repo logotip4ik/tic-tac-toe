@@ -1,11 +1,14 @@
 <template>
   <div class="main">
-    <div v-if="!gamedoc || !gamedoc.player2" class="qrcode">
+    <div v-if="$route.query.initial && !gamedoc.player2" class="qrcode">
       <canvas ref="qrcode"></canvas>
       OR
-      <span
-        >Enter this code: <br /><code>{{ $route.params.id }}</code></span
-      >
+      <span>
+        Enter this code: <br /><code>{{ $route.params.id }}</code>
+      </span>
+    </div>
+    <div v-if="gamedoc.winner" class="qrcode">
+      <h1>{{ user.uid === gamedoc.winner ? 'You win!' : 'Opponent wins' }}</h1>
     </div>
     <h2 class="turn">
       {{ currTurn === 1 ? 'Your turn' : 'Opponent Turn' }}
@@ -56,11 +59,10 @@ export default {
   mounted() {
     const { query } = this.$route
     if (query.initial) this.showShare()
-    this.signin()
     this.setupListener(!query.initial)
   },
   beforeDestroy() {
-    this.deleteGame()
+    // this.deleteGame()
   },
   methods: {
     getCellValue() {
@@ -85,6 +87,11 @@ export default {
       this.$fire.firestore
         .doc(docPath)
         .set({ ...this.gamedoc, deck, steps: this.gamedoc.steps + 1 })
+        .finally(() => {
+          const winner = this.checkWin()
+          if (!winner) return
+          this.$fire.firestore.doc(docPath).set({ winner }, { merge: true })
+        })
     },
     setupListener(shared) {
       const docPath = `games/${this.$route.params.id}`
@@ -106,7 +113,57 @@ export default {
         return 'Are you sure you want to leave ?'
       }
     },
-    signin() {},
+    checkWin() {
+      for (let i = 0; i < 3; i++) {
+        let rowSum = 0
+        for (let j = 0; j < 3; j++) {
+          rowSum += this.gamedoc.deck[i][j]
+        }
+        if (rowSum === 3) return this.gamedoc.player2
+        else if (rowSum === -3) return this.gamedoc.player1
+      }
+
+      for (let i = 0; i < 3; i++) {
+        let colSum = 0
+        for (let j = 0; j < 3; j++) {
+          colSum += this.gamedoc.deck[j][i]
+        }
+        if (colSum === 3) return this.gamedoc.player2
+        else if (colSum === -3) return this.gamedoc.player1
+      }
+
+      if (
+        this.gamedoc.deck[0][0] +
+          this.gamedoc.deck[1][1] +
+          this.gamedoc.deck[2][2] ===
+        3
+      )
+        return this.gamedoc.player2
+      else if (
+        this.gamedoc.deck[0][0] +
+          this.gamedoc.deck[1][1] +
+          this.gamedoc.deck[2][2] ===
+        -3
+      )
+        return this.gamedoc.player1
+
+      if (
+        this.gamedoc.deck[2][0] +
+          this.gamedoc.deck[1][1] +
+          this.gamedoc.deck[0][2] ===
+        3
+      )
+        return this.gamedoc.player2
+      else if (
+        this.gamedoc.deck[2][0] +
+          this.gamedoc.deck[1][1] +
+          this.gamedoc.deck[0][2] ===
+        -3
+      )
+        return this.gamedoc.player1
+
+      return null
+    },
     showShare() {
       const shareHref = `${location.origin}${location.pathname}`
       qrcode.toCanvas(this.$refs.qrcode, shareHref)

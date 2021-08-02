@@ -38,6 +38,12 @@ export default {
 
   @media (prefers-color-scheme: dark) {
     color: whitesmoke;
+
+    &:hover,
+    &:focus {
+      transition: none;
+      background-color: #32539a;
+    }
   }
 }
 </style>
